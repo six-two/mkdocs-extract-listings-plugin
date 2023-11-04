@@ -1,6 +1,9 @@
 site_name: My Docs
-hooks:
-- hooks.py
+plugins:
+- search
+- extract_listings:
+    listings_file: all-listings.md
+    placeholder: CUSTOM_PLACEHOLDER_FOR_THE_LISTINGS_PLUGIN
 
 # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
 markdown_extensions:
