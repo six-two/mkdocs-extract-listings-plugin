@@ -48,3 +48,9 @@ The default value the string `listings.md`.
 
 The value for `placeholder` will be searched in the file referenced by `listings_file` and be replaced with the list of all listings.
 
+
+## Changelog
+
+### Version 0.0.2
+
+- Fixed `Unknown path` being shown on with different themes (`readthedocs` and `material`)

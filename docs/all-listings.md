@@ -1,3 +1,8 @@
+---
+hide:
+- toc
+---
+
 # All listings
 
 CUSTOM_PLACEHOLDER_FOR_THE_LISTINGS_PLUGIN

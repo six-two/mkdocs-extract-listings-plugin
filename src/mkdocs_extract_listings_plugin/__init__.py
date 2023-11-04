@@ -59,9 +59,10 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                 listings.append(str(pre))
 
         if listings:
+            page_url = page.abs_url or page.canonical_url or f"{config.site_url or ''}/{page.url}"
             self.page_data.append(PageData(
                 page_name=page.title or "Untitled page",
-                page_url=page.abs_url or "Unknown path",
+                page_url=page_url,
                 listings=listings,
             ))
 
