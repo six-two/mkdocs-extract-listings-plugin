@@ -2,6 +2,7 @@
 import os
 from typing import NamedTuple
 from html import escape
+import json
 # pip
 from mkdocs.config.config_options import Type
 from mkdocs.config.base import Config
@@ -27,10 +28,15 @@ def is_code_listing(pre_node) -> bool:
         return False
 
 
+class ListingData(NamedTuple):
+    text: str
+    html: str
+
+
 class PageData(NamedTuple):
     page_name: str
     page_url: str
-    listings: list[str]
+    listings: list[ListingData]
 
 
 class ListingsPlugin(BasePlugin[ListingsConfig]):
@@ -56,7 +62,10 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
         for pre in soup.findAll('pre'):
             if is_code_listing(pre):
-                listings.append(str(pre))
+                listings.append(ListingData(
+                    text=pre.get_text(),
+                    html=str(pre),
+                ))
 
         if listings:
             page_url = page.abs_url or page.canonical_url or f"{config.site_url or ''}/{page.url}"
@@ -83,12 +92,29 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             f.write(html)
 
 
+        json_data = [
+            {
+                "page_name": data.page_name,
+                "page_url": data.page_url,
+                "listings": [
+                    {
+                        "text": l.text,
+                        "html": l.html,
+                    } for l in data.listings
+                ],
+            } for data in self.page_data
+        ]
+        
+        with open(os.path.join(config.site_dir, "extract-listings.json"), "w") as f:
+            json.dump(json_data, f, indent=2) 
+
+
     def get_listings_html(self) -> str:
         html = ""
 
         for p in self.page_data:
             html += f'<h2><a href="{p.page_url}">{escape(p.page_url)} - {escape(p.page_name)}</a></h2>'
             for listing in p.listings:
-                html += listing
+                html += listing.html
 
         return html
