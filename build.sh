@@ -26,12 +26,17 @@ cp redirect.html public/index.html
 
 build_with_theme() {
     echo "[*] Building with theme $1"
-    python3 -m mkdocs build -t "$1" -d public/"$1"
+    sed "/^site_url:/s|\$|/$1/|" mkdocs.yml > "mkdocs-$1.yml"
+    python3 -m mkdocs build -f "mkdocs-$1.yml" -t "$1" -d public/"$1"
 }
 
 build_with_theme mkdocs
 build_with_theme readthedocs
 build_with_theme material
 
-echo "[*] To view the site run:"
-echo python3 -m http.server --directory "'$(pwd)/public/'"
+if [[ -z "$1" ]]; then
+    echo "[*] To view the site run:"
+    echo python3 -m http.server --directory "'$(pwd)/public/'"
+else
+    python3 -m http.server --directory public/ "$1"
+fi

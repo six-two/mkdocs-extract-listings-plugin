@@ -1,3 +1,6 @@
+# Mkdocs config files for all themes (generated via ./build.sh)
+mkdocs-*.yml
+
 # mkdocs build output (from ./build-docs.sh)
 public/
 

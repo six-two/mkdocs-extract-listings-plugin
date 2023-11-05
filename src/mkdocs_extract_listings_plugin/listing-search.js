@@ -14,13 +14,13 @@ BASE_URL=""
 const parent = document.getElementById("listing-extract-search")
 if (parent) {
     const search_input = document.createElement("input");
+    search_input.classList.add("md-input", "md-input--stretch");
     search_input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
             console.log("enter");
             search(e.target.value, false);
         }
     });
-
     search_input.addEventListener("input", (e) => {
         search(e.target.value, true);
     });
