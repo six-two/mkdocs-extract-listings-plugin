@@ -5,12 +5,11 @@
 
 // How many results to show as a preview while changing the search query.
 // This limits load required to parse entries, etc and should result in the user getting some quick feedback on his/her search
+(() => {
 PREVIEW_RESULTS = 15
 
 // @TODO: honor base URL
 BASE_URL=""
-
-// @TODO: add dropdown to choose type: substring, case-insensitive substring, fuzzy
 
 const parent = document.getElementById("listing-extract-search")
 if (parent) {
@@ -29,13 +28,26 @@ if (parent) {
     const search_count_div = document.createElement("div");
     search_count_div.innerText = "Loading listing data...";
     
+    const search_type = document.createElement("select");
+    const add_search_type = (value, title) => {
+        const entry = document.createElement("option");
+        entry.value = value;
+        entry.innerText = title;
+        search_type.append(entry);
+    }
+    add_search_type("substr", "Exact match");
+    add_search_type("substr-i", "Exact match (case insensitive)");
+    add_search_type("words", "Contains words");
+    add_search_type("fuzzy", "Fuzzy search");
+    search_type.selectedIndex = 0;
+    search_type.addEventListener("change", () => search(search_input.value, true));
+    
     const search_output = document.createElement("div");
-    parent.append(document.createElement("hr"), search_input, search_count_div, search_output);
+    parent.append(document.createElement("hr"), search_input, search_type, search_count_div, search_output);
     console.debug("Attached search to ", parent);
 
     const set_search_results = (results) => {
-        for (const r of results) {
-            const result = r.obj;
+        for (const result of results) {
             const header = document.createElement("h2");
             const link = document.createElement("a");
             link.href = result.page.url;
@@ -50,13 +62,39 @@ if (parent) {
         }
     }
 
+    const internal_search = (query) => {
+        if (search_type.value == "substr") {
+            return window.extract_listings.filter(x => x.text.includes(query));
+        } else if (search_type.value == "substr-i") {
+            const query_i = query.toLowerCase();
+            return window.extract_listings.filter(x => x.text.toLowerCase().includes(query_i));
+        } else if (search_type.value == "words") {
+            const words = query.split(/\b/);
+            return window.extract_listings.filter(x => {
+                const text_words = x.text.split(/\b/);
+                for (const w of words) {
+                    if (!text_words.includes(w)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        } else if (search_type.value == "fuzzy") {
+            return fuzzysort.go(query, window.extract_listings, {
+                "key": "text",
+                "all": true, // show all results when the query is empty
+                threshold: -10000, // prevent terrible results
+            }).map(x => x.obj);
+        } else {
+            alert(`Unknown search type: ${search_type.value}`);
+            return [];
+        }
+    }
+
     const search = (query, preview) => {
-        const results = fuzzysort.go(query, window.extract_listings, {
-            "key": "text",
-            "all": true, // show all results when the query is empty
-            threshold: -10000, // prevent terrible results
-        })
-        
+        console.debug(`Searching for '${query}' with method ${search_type.value}`);
+        const results = internal_search(query);
+
         search_output.innerHTML = "";//remove children
 
         if (preview && results.length > PREVIEW_RESULTS) {
@@ -95,5 +133,5 @@ if (parent) {
 } else {
     console.warn("Could not find any element with id 'listing-extract-search'")
 }
-       
+})();
 
