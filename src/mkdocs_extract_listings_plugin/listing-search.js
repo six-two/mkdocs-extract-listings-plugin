@@ -50,8 +50,8 @@ if (parent) {
         for (const result of results) {
             const header = document.createElement("h2");
             const link = document.createElement("a");
-            link.href = result.page.url;
-            link.innerText = `${result.page.url} - ${result.page.name}`;
+            link.href = result.page_url;
+            link.innerText = `${result.page_url} - ${result.page_name}`;
             header.append(link);
             
             const div = document.createElement("div");
@@ -109,26 +109,12 @@ if (parent) {
     fetch(BASE_URL+"/extract-listings.json")
         .then(req => req.json())
         .then(json => {
-            console.log(json);
-            // window.extract_listing_json = json;
-            window.extract_listings = []
-            for (const entry of json) {
-                for (const lst of entry.listings) {
-                    window.extract_listings.push({
-                        "page": {
-                            "name": entry.page_name,
-                            "url": entry.page_url,
-                        },
-                        "html": lst.html,
-                        "text": lst.text,
-                    });
+            // Publicly accessible for easier debugging
+            window.extract_listings = json
 
-                    // As soon as all data is loaded, search for the current value
-                    // Use preview to prevent a self-DOS when there are many listings and the query is empty
-                    search(search_input.value, true);
-                }
-            }
-
+            // As soon as all data is loaded, search for the current value
+            // Use preview to prevent a self-DOS when there are many listings and the query is empty
+            search(search_input.value, true);
         })
 } else {
     console.warn("Could not find any element with id 'listing-extract-search'")

@@ -1,9 +1,19 @@
 site_name: My Docs
+
 plugins:
 - search
 - extract_listings:
-    listings_file: all-listings.md
+    listings_file: plugin/all-listings.md
     placeholder: CUSTOM_PLACEHOLDER_FOR_THE_LISTINGS_PLUGIN
+    javascript_search_file: listing-search.js
+
+theme:
+  name: material
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+
 
 # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
 markdown_extensions:

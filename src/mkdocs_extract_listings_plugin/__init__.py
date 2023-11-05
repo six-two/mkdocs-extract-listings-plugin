@@ -3,6 +3,7 @@ import os
 from typing import NamedTuple
 from html import escape
 import json
+import shutil
 # pip
 from mkdocs.config.config_options import Type
 from mkdocs.config.base import Config
@@ -12,9 +13,13 @@ from mkdocs.structure.pages import Page
 from mkdocs.config.defaults import MkDocsConfig
 from bs4 import BeautifulSoup
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
 class ListingsConfig(Config):
-    listings_file = Type(str, default="listings.md")
+    listings_file = Type(str, default="")
     placeholder = Type(str, default="PLACEHOLDER_LISTINGS_PLUGIN")
+    javascript_search_file = Type(str, default="")
 
 
 def is_code_listing(pre_node) -> bool:
@@ -45,15 +50,19 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         self.page_data: list[PageData] = []
         self.logger = get_plugin_logger(__name__)
 
-    def on_pre_build(self, config: MkDocsConfig):
+    def on_pre_build(self, config: MkDocsConfig) -> None:
         # Reset before every build -> prevent duplicate entries when running mkdocs serve
         self.page_data = []
 
-        listings_file = os.path.join(config.docs_dir, self.config.listings_file)
-        if not os.path.isfile(listings_file):
-            raise PluginError(f"'listings_file' does not reference a valid Markdown file: '{listings_file}' does not exist")
-        elif not self.config.listings_file.endswith(".md"):
-            self.logger.warning(f"Value for 'listings_file' should probably end in '.md', but is '{self.config.listings_file}'")
+        if self.config.listings_file:
+            listings_file = os.path.join(config.docs_dir, self.config.listings_file)
+            if not os.path.isfile(listings_file):
+                raise PluginError(f"'listings_file' does not reference a valid Markdown file: '{listings_file}' does not exist")
+            elif not self.config.listings_file.endswith(".md"):
+                self.logger.warning(f"Value for 'listings_file' should probably end in '.md', but is '{self.config.listings_file}'")
+        else:
+            if not self.config.javascript_search_file:
+                self.logger.warning("Neither 'javascript_search_file' nor 'listings_file' are set -> This plugin will do nothing. Please check the setup instructions at https://github.com/six-two/mkdocs-extract-listings-plugin/blob/main/README.md")
 
     # https://www.mkdocs.org/dev-guide/plugins/#on_page_content
     def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files) -> None:
@@ -75,7 +84,14 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                 listings=listings,
             ))
 
-    def on_post_build(self, config: MkDocsConfig):
+    def on_post_build(self, config: MkDocsConfig) -> None:
+        self.update_all_listings_page(config)
+
+        if self.config.javascript_search_file:
+            self.write_javascript_file(config)
+            self.write_json_file(config)
+
+    def update_all_listings_page(self, config: MkDocsConfig) -> None:
         # We write the data in post-build -> listings should not be re-indexed and all pages were processed
         path = os.path.join(config.site_dir, self.config.listings_file).removesuffix(".md")
         if config.use_directory_urls:
@@ -91,22 +107,29 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         with open(path, "w") as f:
             f.write(html)
 
-
-        json_data = [
-            {
-                "page_name": data.page_name,
-                "page_url": data.page_url,
-                "listings": [
-                    {
-                        "text": l.text,
-                        "html": l.html,
-                    } for l in data.listings
-                ],
-            } for data in self.page_data
-        ]
+    def write_json_file(self, config: MkDocsConfig) -> None:   
+        json_data = []
+        for page in self.page_data:
+            for listing in page.listings:
+                json_data.append({
+                    "page_name": page.page_name,
+                    "page_url": page.page_url,
+                    "text": listing.text,
+                    "html": listing.html,
+                })
         
         with open(os.path.join(config.site_dir, "extract-listings.json"), "w") as f:
-            json.dump(json_data, f, indent=2) 
+            json.dump(json_data, f, indent=2)
+
+
+    def write_javascript_file(self, config: MkDocsConfig) -> None:
+        dst_path = os.path.join(config.site_dir, self.config.javascript_search_file)
+        dst_path_parent = os.path.dirname(dst_path)
+        if not os.path.exists(dst_path_parent):
+            os.makedirs(dst_path_parent)
+        
+        src_path = os.path.join(SCRIPT_DIR, "listing-search.js")
+        shutil.copyfile(src_path, dst_path)
 
 
     def get_listings_html(self) -> str:
