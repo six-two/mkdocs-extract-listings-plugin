@@ -3,7 +3,7 @@ import os
 from typing import NamedTuple
 from html import escape
 import json
-import shutil
+from urllib.parse import urlparse
 # pip
 from mkdocs.config.config_options import Type
 from mkdocs.config.base import Config
@@ -129,8 +129,25 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             os.makedirs(dst_path_parent)
         
         src_path = os.path.join(SCRIPT_DIR, "listing-search.js")
-        shutil.copyfile(src_path, dst_path)
+        with open(src_path, "r") as f:
+            js = f.read()
 
+        if config.site_url:
+            path = urlparse(config.site_url).path
+            # Remove trailing trashes
+            while path.endswith("/"):
+                path = path[:-1]
+
+            # Fix duplicate slashes (no idea why it happens)
+            path = path.replace("//", "/")
+
+            if path:
+                # PAth contains something else than just slashes
+                js = js.replace('BASE_URL=""', f'BASE_URL="{path}"')
+                # self.logger.info(f"Set baseurl to {path}")
+
+        with open(dst_path, "w") as f:
+            f.write(js)
 
     def get_listings_html(self) -> str:
         html = ""

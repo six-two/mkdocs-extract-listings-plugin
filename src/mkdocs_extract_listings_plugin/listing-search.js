@@ -7,8 +7,6 @@
 // This limits load required to parse entries, etc and should result in the user getting some quick feedback on his/her search
 (() => {
 PREVIEW_RESULTS = 15
-
-// @TODO: honor base URL
 BASE_URL=""
 
 const parent = document.getElementById("listing-extract-search")
@@ -106,7 +104,8 @@ if (parent) {
         }        
     }
 
-    fetch(BASE_URL+"/extract-listings.json")
+    console.log("Base URL:", BASE_URL);
+    fetch(`${window.location.protocol}//${window.location.host}${BASE_URL}/extract-listings.json`)
         .then(req => req.json())
         .then(json => {
             // Publicly accessible for easier debugging

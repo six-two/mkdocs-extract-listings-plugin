@@ -1,8 +1,7 @@
 # mkdocs-extract-listings-plugin
 
 A small plugin to extract all your listings and put them in a single page.
-Might for example be useful if the search plugin makes it hard finding a code snippet you want to find (or you disabled the search).
-Just open the page with all listings and use the `Find in page` function.
+It can also generate a search function of code listings with different search methods (fuzzy match, substring, contains words).
 
 ## Setup
 
@@ -86,10 +85,10 @@ The default value is empty, meaning that neither the JSOn file nor the JavaScrip
 
 ## Changelog
 
-### Head
+### Version 0.0.3
 
-- Todo: handle base url
 - Added snippet search JavaScript and JSON file.
+- Changed default for `listings_file` to empty string.
 
 ### Version 0.0.2
 
