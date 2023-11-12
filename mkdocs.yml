@@ -8,7 +8,7 @@ plugins:
     javascript_search_file: listing-search.js
 
 theme: material
-site_url: https://example.six-two.dev/
+site_url: https://mkdocs-extract-listings-plugin.six-two.dev/
 
 # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
 markdown_extensions:

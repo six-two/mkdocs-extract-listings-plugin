@@ -78,6 +78,10 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
         if listings:
             page_url = page.abs_url or page.canonical_url or f"{config.site_url or ''}/{page.url}"
+            # This SHOULD fix the duplicate slash display bug (like '//readthedocs/')
+            for _ in range(3):
+                page_url = page_url.replace("//", "/")
+
             self.page_data.append(PageData(
                 page_name=page.title or "Untitled page",
                 page_url=page_url,
@@ -138,8 +142,9 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             while path.endswith("/"):
                 path = path[:-1]
 
-            # Fix duplicate slashes (no idea why it happens)
-            path = path.replace("//", "/")
+            # # Fix duplicate slashes (no idea why it happens) @TODO: is this needed?
+            # for _ in range(3):
+            #     path = path.replace("//", "/")
 
             if path:
                 # PAth contains something else than just slashes

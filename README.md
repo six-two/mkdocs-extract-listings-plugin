@@ -3,6 +3,12 @@
 A small plugin to extract all your listings and put them in a single page.
 It can also generate a search function of code listings with different search methods (fuzzy match, substring, contains words).
 
+## Demo
+
+You can try out the demo at <https://mkdocs-extract-listings-plugin.six-two.dev>.
+It is configured to offer both the search and all listings pages an uses the plugin with some common MkDocs themes (mkdocs, readthedocs, and material).
+The source for this demo is also in this repo (`mkdocs.yml`, `docs/` and `build.sh`).
+
 ## Setup
 
 1. Install the plugin using pip:
@@ -84,6 +90,10 @@ The default value is empty, meaning that neither the JSOn file nor the JavaScrip
 
 
 ## Changelog
+
+### Version 0.0.4
+
+- Fixed bug: URL for index pages starts with `//`
 
 ### Version 0.0.3
 

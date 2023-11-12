@@ -6,13 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Listing pages</h1>
+    <h1>Demo listing pages</h1>
 
     Choose your theme:
     <ul>
-        <li><a href="readthedocs/plugin/">readthedocs</a></li>
-        <li><a href="mkdocs/plugin/">mkdocs (default)</a></li>
-        <li><a href="material/plugin/">Material for MkDocs</a></li>
+        <script>
+            for (theme of ["mkdocs", "readthedocs", "material"]) {
+                document.write(`<li>${theme}: <a href="${theme}/plugin/listing-search/">search page</a>, <a href="${theme}/plugin/all-listings/">all listings page</a></li>`)
+            }
+        </script>
     </ul>
 </body>
 </html>
