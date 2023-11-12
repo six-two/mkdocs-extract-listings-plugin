@@ -148,14 +148,9 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             while path.endswith("/"):
                 path = path[:-1]
 
-            # # Fix duplicate slashes (no idea why it happens) @TODO: is this needed?
-            # for _ in range(3):
-            #     path = path.replace("//", "/")
-
             if path:
-                # PAth contains something else than just slashes
+                # Path contains something else than just slashes
                 js = js.replace('BASE_URL=""', f'BASE_URL="{path}"')
-                # self.logger.info(f"Set baseurl to {path}")
 
         with open(dst_path, "w") as f:
             f.write(js)

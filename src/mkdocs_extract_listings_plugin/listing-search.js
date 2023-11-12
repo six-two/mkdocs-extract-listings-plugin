@@ -12,18 +12,40 @@ STYLE=``;
 
 const parent = document.getElementById("listing-extract-search")
 if (parent) {
+    const add_link = (parent_element, href, title, className) => {
+        const element = document.createElement("a");
+        element.href = href;
+        element.innerText = title;
+        if (className) {
+            element.classList.add(className);
+        }
+        if (parent_element) {
+            parent_element.append(element);
+        }
+        return element;
+    };
+
+    const add_div = (parent_element, className, ...children) => {
+        const element = document.createElement("div");
+        element.classList.add(className);
+        if (children) {
+            element.append(...children);
+        }
+        if (parent_element) {
+            parent_element.append(element);
+        }
+        return element;
+    }
+
     const search_input = document.createElement("input");
     search_input.classList.add("md-input", "md-input--stretch");
     search_input.placeholder = "Search listings by typing here";
     search_input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
-            console.log("enter");
             search(e.target.value, false);
         }
     });
-    search_input.addEventListener("input", (e) => {
-        search(e.target.value, true);
-    });
+    search_input.addEventListener("input", (e) => search(e.target.value, true));
 
     const search_count_div = document.createElement("div");
     search_count_div.classList.add("search-count");
@@ -43,41 +65,11 @@ if (parent) {
     search_type.selectedIndex = 0;
     search_type.addEventListener("change", () => search(search_input.value, true));
 
-    const search_input_div = document.createElement("div");
-    search_input_div.classList.add("search-input-line");
-    const search_div = document.createElement("div");
-    search_div.classList.add("search-inputs");
-    search_input_div.append(search_input, search_type);
-    search_div.append(search_input_div, search_count_div);
-    
-    
-    const search_output = document.createElement("div");
-    search_output.classList.add("search-output");
-    parent.append(search_div, search_output);
+    const search_input_line = add_div(null, "search-input-line", search_input, search_type);
+    add_div(parent, "search-inputs", search_input_line, search_count_div);
+    const search_output = add_div(parent, "search-output");
     console.debug("Attached search to ", parent);
 
-    const add_link = (parent_element, href, title, className) => {
-        const element = document.createElement("a");
-        element.href = href;
-        element.innerText = title;
-        if (className) {
-            element.classList.add(className);
-        }
-        if (parent_element) {
-            parent_element.append(element);
-        }
-        return element;
-    };
-
-    const add_div = (parent_element, className, ...children) => {
-        const element = document.createElement("div");
-        element.classList.add(className);
-        element.append(...children);
-        if (parent_element) {
-            parent_element.append(element);
-        }
-        return element;
-    }
 
     const set_search_results = (results) => {
         for (const result of results) {
