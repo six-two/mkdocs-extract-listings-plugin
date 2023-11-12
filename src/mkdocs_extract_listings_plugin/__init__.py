@@ -19,6 +19,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 class ListingsConfig(Config):
     listings_file = Type(str, default="")
     placeholder = Type(str, default="PLACEHOLDER_LISTINGS_PLUGIN")
+    default_css = Type(bool, default=True)
     javascript_search_file = Type(str, default="")
 
 
@@ -136,6 +137,11 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         with open(src_path, "r") as f:
             js = f.read()
 
+        if self.config.default_css:
+            with open(os.path.join(SCRIPT_DIR, "default.css")) as f:
+                css = f.read()
+            js = js.replace("STYLE=``;", f"STYLE=`{css}`;")
+
         if config.site_url:
             path = urlparse(config.site_url).path
             # Remove trailing trashes
@@ -157,8 +163,12 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
     def get_listings_html(self) -> str:
         html = ""
 
+        if self.config.default_css:
+            html += '<style>a.url { color: gray; font-size: small; display: block; }</style>'
+
         for p in self.page_data:
-            html += f'<h2><a href="{p.page_url}">{escape(p.page_url)} - {escape(p.page_name)}</a></h2>'
+            html += f'<h2><a class="heading" href="{p.page_url}">{escape(p.page_name)}</a></h2>'
+            html += f'<a class="url" href="{p.page_url}">{escape(p.page_url)}</a>'
             for listing in p.listings:
                 html += listing.html
 

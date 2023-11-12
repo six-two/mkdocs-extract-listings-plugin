@@ -6,13 +6,15 @@
 // How many results to show as a preview while changing the search query.
 // This limits load required to parse entries, etc and should result in the user getting some quick feedback on his/her search
 (() => {
-PREVIEW_RESULTS = 15
-BASE_URL=""
+PREVIEW_RESULTS = 15;
+BASE_URL="";
+STYLE=``;
 
 const parent = document.getElementById("listing-extract-search")
 if (parent) {
     const search_input = document.createElement("input");
     search_input.classList.add("md-input", "md-input--stretch");
+    search_input.placeholder = "Search listings by typing here";
     search_input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
             console.log("enter");
@@ -24,6 +26,7 @@ if (parent) {
     });
 
     const search_count_div = document.createElement("div");
+    search_count_div.classList.add("search-count");
     search_count_div.innerText = "Loading listing data...";
     
     const search_type = document.createElement("select");
@@ -39,24 +42,53 @@ if (parent) {
     add_search_type("fuzzy", "Fuzzy search");
     search_type.selectedIndex = 0;
     search_type.addEventListener("change", () => search(search_input.value, true));
+
+    const search_input_div = document.createElement("div");
+    search_input_div.classList.add("search-input-line");
+    const search_div = document.createElement("div");
+    search_div.classList.add("search-inputs");
+    search_input_div.append(search_input, search_type);
+    search_div.append(search_input_div, search_count_div);
+    
     
     const search_output = document.createElement("div");
-    parent.append(document.createElement("hr"), search_input, search_type, search_count_div, search_output);
+    search_output.classList.add("search-output");
+    parent.append(search_div, search_output);
     console.debug("Attached search to ", parent);
+
+    const add_link = (parent_element, href, title, className) => {
+        const element = document.createElement("a");
+        element.href = href;
+        element.innerText = title;
+        if (className) {
+            element.classList.add(className);
+        }
+        if (parent_element) {
+            parent_element.append(element);
+        }
+        return element;
+    };
+
+    const add_div = (parent_element, className, ...children) => {
+        const element = document.createElement("div");
+        element.classList.add(className);
+        element.append(...children);
+        if (parent_element) {
+            parent_element.append(element);
+        }
+        return element;
+    }
 
     const set_search_results = (results) => {
         for (const result of results) {
-            const header = document.createElement("h2");
-            const link = document.createElement("a");
-            link.href = result.page_url;
-            link.innerText = `${result.page_url} - ${result.page_name}`;
-            header.append(link);
-            
+            const header = add_link(null, result.page_url, result.page_name, "heading");
+            const page_url = add_link(null, result.page_url, result.page_url, "url");
+
             const div = document.createElement("div");
+            div.classList.add("listing");
             div.innerHTML = result.html;
             
-            // For debugging, add r.score
-            search_output.append(header, div);
+            add_div(search_output, "search-result", header, page_url, div);
         }
     }
 
@@ -96,12 +128,18 @@ if (parent) {
         search_output.innerHTML = "";//remove children
 
         if (preview && results.length > PREVIEW_RESULTS) {
-            search_count_div.innerText = `Found ${results.length} results. Preview is limited to ${PREVIEW_RESULTS}, press Enter to show them all`;
+            search_count_div.innerHTML = `Found ${results.length} results. Preview is limited to ${PREVIEW_RESULTS}, press <code>Enter</code> to show them all`;
             set_search_results(results.slice(0, PREVIEW_RESULTS));
         } else {
             search_count_div.innerText = `Found ${results.length} result(s)`;
             set_search_results(results);
         }        
+    }
+
+    if (STYLE) {
+        const style = document.createElement("style");
+        style.innerHTML = STYLE;
+        document.body.append(style);
     }
 
     console.log("Base URL:", BASE_URL);

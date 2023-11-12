@@ -1,2 +1,3 @@
 include README.md
 include src/mkdocs_extract_listings_plugin/listing-search.js
+include src/mkdocs_extract_listings_plugin/default.css

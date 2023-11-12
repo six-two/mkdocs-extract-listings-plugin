@@ -70,7 +70,15 @@ plugins:
     listings_file: listings.md
     placeholder: PLACEHOLDER_LISTINGS_PLUGIN
     javascript_search_file: listing-search.js
+    default_css: true
 ```
+
+### default_css
+
+`default_css` determines, whether the search JavaScript should also load the default styling for the search dialog and results.
+By default it is set to `true`, but you can set it to `false` if the theme you use does not work well with the style.
+You should then define your own custom style and include it on the search page.
+Also has some effect on the all listings page.
 
 ### listings_file
 
@@ -93,6 +101,7 @@ The default value is empty, meaning that neither the JSOn file nor the JavaScrip
 
 ### Version 0.0.4
 
+- Added styling for the search page and the option `default_css` to disable it.
 - Fixed bug: URL for index pages starts with `//`
 
 ### Version 0.0.3
