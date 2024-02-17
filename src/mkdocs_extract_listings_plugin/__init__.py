@@ -99,11 +99,13 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
     def update_all_listings_page(self, config: MkDocsConfig) -> None:
         # We write the data in post-build -> listings should not be re-indexed and all pages were processed
         if self.config.listings_file:
-            path = os.path.join(config.site_dir, self.config.listings_file).removesuffix(".md")
-            if config.use_directory_urls:
-                path = os.path.join(path, "index.html")
-            else:
-                path += ".html"
+            path = os.path.join(config.site_dir, self.config.listings_file)
+            if path.endswith(".md"):
+                path_without_extension = path[:-3]
+                if config.use_directory_urls:
+                    path = os.path.join(path_without_extension, "index.html")
+                else:
+                    path = f"{path_without_extension}.html"
 
             with open(path, "r") as f:
                 html = f.read()

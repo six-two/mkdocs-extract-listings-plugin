@@ -9,9 +9,12 @@
 PREVIEW_RESULTS = 15;
 BASE_URL="";
 STYLE=``;
+DEFAULT_SEARCH_MODE="substr-i";
 
-const parent = document.getElementById("listing-extract-search")
+const parent = document.getElementById("listing-extract-search");
 if (parent) {
+    const search_mode = parent.getAttribute("data-searchmode") || DEFAULT_SEARCH_MODE;
+
     const add_link = (parent_element, href, title, className) => {
         const element = document.createElement("a");
         element.href = href;
@@ -52,17 +55,27 @@ if (parent) {
     search_count_div.innerText = "Loading listing data...";
     
     const search_type = document.createElement("select");
+    const search_type_list = [];
     const add_search_type = (value, title) => {
+        search_type_list.push(value);
         const entry = document.createElement("option");
         entry.value = value;
         entry.innerText = title;
         search_type.append(entry);
     }
+
     add_search_type("substr", "Exact match");
     add_search_type("substr-i", "Exact match (case insensitive)");
     add_search_type("words", "Contains words");
-    add_search_type("fuzzy", "Fuzzy search");
-    search_type.selectedIndex = 0;
+    add_search_type("words-i", "Contains words (case insensitive)");
+    add_search_type("fuzzy", "Fuzzy search (always case insensitive)");
+
+    default_index = search_type_list.indexOf(search_mode);
+    if (default_index != -1) {
+        search_type.selectedIndex = default_index;
+    } else {
+        console.warn(`The search order type '${search_mode}' is unknown. Valid values are ${search_type_list}`)
+    }
     search_type.addEventListener("change", () => search(search_input.value, true));
 
     const search_input_line = add_div(null, "search-input-line", search_input, search_type);
@@ -84,31 +97,43 @@ if (parent) {
         }
     }
 
+    const get_words = (text) => {
+        return text.match(/\b\w+\b/g) || [];
+    }
+
     const internal_search = (query) => {
-        if (search_type.value == "substr") {
-            return window.extract_listings.filter(x => x.text.includes(query));
-        } else if (search_type.value == "substr-i") {
-            const query_i = query.toLowerCase();
-            return window.extract_listings.filter(x => x.text.toLowerCase().includes(query_i));
-        } else if (search_type.value == "words") {
-            const words = query.split(/\b/);
-            return window.extract_listings.filter(x => {
-                const text_words = x.text.split(/\b/);
-                for (const w of words) {
-                    if (!text_words.includes(w)) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-        } else if (search_type.value == "fuzzy") {
-            return fuzzysort.go(query, window.extract_listings, {
+        if (search_type.value.endsWith("-i")) {
+            // Search mode without the -i
+            let search_mode = search_type.value.slice(0, -2);
+            // Use the lowercase versions of the query and the search data
+            return internal_search_logic(query.toLowerCase(), window.extract_listings_lowercase, search_mode);
+        } else {
+            return internal_search_logic(query, window.extract_listings_case_sensitive, search_type.value);
+        }
+    }
+
+    const internal_search_logic = (query, listings_list, search_mode) => {
+        if (search_mode == "substr") {
+            return listings_list.filter(x => x.text.includes(query));
+        } else if (search_mode == "words") {
+            const query_words = get_words(query);
+            if (query_words) {
+                return listings_list.filter(x => {
+                    const text_words = get_words(x.text);
+                    return query_words.every(w => text_words.includes(w));
+                });
+            } else {
+                // Empty search queries return all listings for all other search types, so we should do the same here
+                return listings_list;
+            }
+        } else if (search_mode == "fuzzy") {
+            return fuzzysort.go(query, listings_list, {
                 "key": "text",
                 "all": true, // show all results when the query is empty
                 threshold: -10000, // prevent terrible results
             }).map(x => x.obj);
         } else {
-            alert(`Unknown search type: ${search_type.value}`);
+            alert(`Unknown search type: ${search_mode}`);
             return [];
         }
     }
@@ -139,7 +164,9 @@ if (parent) {
         .then(req => req.json())
         .then(json => {
             // Publicly accessible for easier debugging
-            window.extract_listings = json
+            window.extract_listings_case_sensitive = json
+            // @TODO: maybe only cache this if an cae-insensitive mode is selected?
+            window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 
             // As soon as all data is loaded, search for the current value
             // Use preview to prevent a self-DOS when there are many listings and the query is empty

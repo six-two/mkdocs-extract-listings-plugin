@@ -95,12 +95,28 @@ The value for `placeholder` will be searched in the file referenced by `listings
 The JavaScript code for the search function will be written to this path.
 The default value is empty, meaning that neither the JSOn file nor the JavaScript are generated.
 
+### Search mode
+
+You can set the search mode via the `data-serachmode` attribute:
+```html
+<div id="listing-extract-search" data-searchmode="substr"></div>
+```
+
+To see all current valid values inspect the search type dropdown menu using your browser's developer tools.
+The data in the `value` attribute is the value you should put in the attribute:
+
+![Firefox's Developer tools](docs/show-search-modes.png)
+
+Alternatively you can put in a random value and will receive an warning message in the developer tools, that also lists the valid values (but without descriptions).
 
 
 ## Changelog
 
 ### Head
 
+- Improved the search code:
+    - Allow users to specify which matching mode the search uses by default.
+    - Added mode `Contains words (case insensitive)`
 - Fixed crash when using `use_directory_urls: false` and not setting `listings_file`.
 
 ### Version 0.0.4
