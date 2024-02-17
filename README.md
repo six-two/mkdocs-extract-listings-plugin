@@ -99,6 +99,10 @@ The default value is empty, meaning that neither the JSOn file nor the JavaScrip
 
 ## Changelog
 
+### Head
+
+- Fixed crash when using `use_directory_urls: false` and not setting `listings_file`.
+
 ### Version 0.0.4
 
 - Added styling for the search page and the option `default_css` to disable it.

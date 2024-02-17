@@ -98,19 +98,20 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
     def update_all_listings_page(self, config: MkDocsConfig) -> None:
         # We write the data in post-build -> listings should not be re-indexed and all pages were processed
-        path = os.path.join(config.site_dir, self.config.listings_file).removesuffix(".md")
-        if config.use_directory_urls:
-            path = os.path.join(path, "index.html")
-        else:
-            path += ".html"
+        if self.config.listings_file:
+            path = os.path.join(config.site_dir, self.config.listings_file).removesuffix(".md")
+            if config.use_directory_urls:
+                path = os.path.join(path, "index.html")
+            else:
+                path += ".html"
 
-        with open(path, "r") as f:
-            html = f.read()
+            with open(path, "r") as f:
+                html = f.read()
 
-        html = html.replace(self.config.placeholder, self.get_listings_html())
+            html = html.replace(self.config.placeholder, self.get_listings_html())
 
-        with open(path, "w") as f:
-            f.write(html)
+            with open(path, "w") as f:
+                f.write(html)
 
     def write_json_file(self, config: MkDocsConfig) -> None:   
         json_data = []
