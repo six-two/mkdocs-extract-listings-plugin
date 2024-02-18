@@ -114,9 +114,10 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ### Head
 
+- Use relative links on the `listings_file` page.
 - Improved the search code:
     - Allow users to specify which matching mode the search uses by default.
-    - Added mode `Contains words (case insensitive)`
+    - Added mode `Contains words (case insensitive)`.
 - Fixed crash when using `use_directory_urls: false` and not setting `listings_file`.
 
 ### Version 0.0.4

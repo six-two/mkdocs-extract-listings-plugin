@@ -56,6 +56,9 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         self.page_data = []
 
         if self.config.listings_file:
+            if os.path.isabs(self.config.listings_file):
+                raise PluginError(f"'listings_file' can not be an absolute path: ${self.config.listings_file}")
+
             listings_file = os.path.join(config.docs_dir, self.config.listings_file)
             if not os.path.isfile(listings_file):
                 raise PluginError(f"'listings_file' does not reference a valid Markdown file: '{listings_file}' does not exist")
@@ -78,10 +81,18 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                 ))
 
         if listings:
-            page_url = page.abs_url or page.canonical_url or f"{config.site_url or ''}/{page.url}"
+            page_url = page.abs_url or page.canonical_url or page.url
             # This SHOULD fix the duplicate slash display bug (like '//readthedocs/')
             for _ in range(3):
                 page_url = page_url.replace("//", "/")
+
+            # Remove leading slash
+            if page_url.startswith("/"):
+                page_url = page_url[1:] or "index.html"
+
+            if page_url.startswith("http://") or page_url.startswith("https://"):
+                self.logger.warning(f"page_url is expected to be just a path, but it is a full URL: '{page_url}'")
+                # No clue if it can happen. If it can, I should parse the path from the URL (and maybe remove the base URL).
 
             self.page_data.append(PageData(
                 page_name=page.title or "Untitled page",
@@ -100,17 +111,13 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         # We write the data in post-build -> listings should not be re-indexed and all pages were processed
         if self.config.listings_file:
             path = os.path.join(config.site_dir, self.config.listings_file)
-            if path.endswith(".md"):
-                path_without_extension = path[:-3]
-                if config.use_directory_urls:
-                    path = os.path.join(path_without_extension, "index.html")
-                else:
-                    path = f"{path_without_extension}.html"
+            path = markdown_path_to_html_path(config, path)
 
             with open(path, "r") as f:
                 html = f.read()
 
-            html = html.replace(self.config.placeholder, self.get_listings_html())
+            listings_html_content = self.get_listings_html(config, self.config.listings_file)
+            html = html.replace(self.config.placeholder, listings_html_content)
 
             with open(path, "w") as f:
                 f.write(html)
@@ -158,16 +165,32 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
         with open(dst_path, "w") as f:
             f.write(js)
 
-    def get_listings_html(self) -> str:
+    def get_listings_html(self, config: MkDocsConfig, relative_path_to_markdown_file: str) -> str:
         html = ""
+        path_to_html_page_dir = os.path.dirname(markdown_path_to_html_path(config, relative_path_to_markdown_file))
 
         if self.config.default_css:
             html += '<style>a.url { color: gray; font-size: small; display: block; }</style>'
 
         for p in self.page_data:
-            html += f'<h2><a class="heading" href="{p.page_url}">{escape(p.page_name)}</a></h2>'
-            html += f'<a class="url" href="{p.page_url}">{escape(p.page_url)}</a>'
+            relative_path = os.path.relpath(p.page_url, start=path_to_html_page_dir)
+            html += f'<h2><a class="heading" href="{escape(relative_path)}">{escape(p.page_name)}</a></h2>'
+            html += f'<a class="url" href="{escape(relative_path)}">{escape(p.page_url)}</a>'
             for listing in p.listings:
                 html += listing.html
 
         return html
+
+def markdown_path_to_html_path(config: MkDocsConfig, markdown_path: str) -> str:
+    if markdown_path.endswith(".md"):
+        path_without_extension = markdown_path[:-3]
+        if config.use_directory_urls:
+            file_name = os.path.basename(markdown_path)
+            if file_name == "index.md":
+                return f"{path_without_extension}.html"
+            else:
+                return os.path.join(path_without_extension, "index.html")
+        else:
+            return f"{path_without_extension}.html"
+    else:
+        return markdown_path
