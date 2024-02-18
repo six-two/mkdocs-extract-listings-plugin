@@ -8,6 +8,7 @@ plugins:
     placeholder: CUSTOM_PLACEHOLDER_FOR_THE_LISTINGS_PLUGIN
     javascript_search_file: listing-search.js
     default_css: true
+    offline: false
 
 theme: material
 site_url: https://mkdocs-extract-listings-plugin.six-two.dev/

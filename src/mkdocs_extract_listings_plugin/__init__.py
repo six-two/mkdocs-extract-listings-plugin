@@ -20,6 +20,7 @@ class ListingsConfig(Config):
     listings_file = Type(str, default="")
     placeholder = Type(str, default="PLACEHOLDER_LISTINGS_PLUGIN")
     default_css = Type(bool, default=True)
+    offline = Type(bool, default=False)
     javascript_search_file = Type(str, default="")
 
 
@@ -105,7 +106,8 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
         if self.config.javascript_search_file:
             self.write_javascript_file(config)
-            self.write_json_file(config)
+            if not self.config.offline:
+                self.write_json_file(config)
 
     def update_all_listings_page(self, config: MkDocsConfig) -> None:
         # We write the data in post-build -> listings should not be re-indexed and all pages were processed
@@ -122,7 +124,14 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             with open(path, "w") as f:
                 f.write(html)
 
-    def write_json_file(self, config: MkDocsConfig) -> None:   
+    def write_json_file(self, config: MkDocsConfig) -> None:
+        # We use a relative path to the script file (script file + ".json" extension)
+        dst_path = os.path.join(config.site_dir, self.config.javascript_search_file) + ".json"
+        json_data = self.get_json_data(config)
+        with open(dst_path, "w") as f:
+            json.dump(json_data, f, indent=2)
+
+    def get_json_data(self, config: MkDocsConfig) -> list[dict]:
         json_data = []
         for page in self.page_data:
             for listing in page.listings:
@@ -132,10 +141,8 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                     "text": listing.text,
                     "html": listing.html,
                 })
-        
-        with open(os.path.join(config.site_dir, "extract-listings.json"), "w") as f:
-            json.dump(json_data, f, indent=2)
 
+        return json_data
 
     def write_javascript_file(self, config: MkDocsConfig) -> None:
         dst_path = os.path.join(config.site_dir, self.config.javascript_search_file)
@@ -151,6 +158,10 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             with open(os.path.join(SCRIPT_DIR, "default.css")) as f:
                 css = f.read()
             js = js.replace("STYLE=``;", f"STYLE=`{css}`;")
+        
+        if self.config.offline:
+            json_data = self.get_json_data(config)
+            js = js.replace("OFFLINE_JSON_DATA=null;", f"OFFLINE_JSON_DATA={json.dumps(json_data)};")
 
         if config.site_url:
             path = urlparse(config.site_url).path

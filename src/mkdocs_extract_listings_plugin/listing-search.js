@@ -8,8 +8,11 @@
 (() => {
 PREVIEW_RESULTS = 15;
 BASE_URL="";
-STYLE=``;
 DEFAULT_SEARCH_MODE="substr-i";
+// START: These values may be overwritten when the file is copied by the plugin
+STYLE=``;
+OFFLINE_JSON_DATA=null;
+// END
 
 const parent = document.getElementById("listing-extract-search");
 if (parent) {
@@ -159,19 +162,24 @@ if (parent) {
         document.body.append(style);
     }
 
-    console.log("Base URL:", BASE_URL);
-    fetch(`${window.location.protocol}//${window.location.host}${BASE_URL}/extract-listings.json`)
-        .then(req => req.json())
-        .then(json => {
-            // Publicly accessible for easier debugging
-            window.extract_listings_case_sensitive = json
-            // @TODO: maybe only cache this if an cae-insensitive mode is selected?
-            window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
+    const on_json_loaded = (json) => {
+        // Publicly accessible for easier debugging
+        window.extract_listings_case_sensitive = json
+        // @TODO: maybe only cache this if an cae-insensitive mode is selected?
+        window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 
-            // As soon as all data is loaded, search for the current value
-            // Use preview to prevent a self-DOS when there are many listings and the query is empty
-            search(search_input.value, true);
-        })
+        // As soon as all data is loaded, search for the current value
+        // Use preview to prevent a self-DOS when there are many listings and the query is empty
+        search(search_input.value, true);
+    };
+
+    if (OFFLINE_JSON_DATA != null) {
+        on_json_loaded(OFFLINE_JSON_DATA);
+    } else {
+        fetch(document.currentScript.src + ".json")
+            .then(req => req.json())
+            .then(on_json_loaded);
+    }
 } else {
     console.warn("Could not find any element with id 'listing-extract-search'")
 }

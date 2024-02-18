@@ -16,7 +16,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 
 # Do not use directory urls, since the browser does not map from /path/ to /path/index.html for file:// urls
-sed "/^use_directory_urls:/s|true|false|" mkdocs.yml > "mkdocs-offline.yml"
+sed -e '/^use_directory_urls:/s|true|false|' -e '/offline:/s|false|true|' -e '/plugins:/a- offline' mkdocs.yml > "mkdocs-offline.yml"
 
 echo "[*] Building site"
 python3 -m mkdocs build -f "mkdocs-offline.yml" || exit 1

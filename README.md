@@ -71,6 +71,7 @@ plugins:
     placeholder: PLACEHOLDER_LISTINGS_PLUGIN
     javascript_search_file: listing-search.js
     default_css: true
+    offline: false
 ```
 
 ### default_css
@@ -95,6 +96,13 @@ The value for `placeholder` will be searched in the file referenced by `listings
 The JavaScript code for the search function will be written to this path.
 The default value is empty, meaning that neither the JSOn file nor the JavaScript are generated.
 
+### offline
+
+When set to `true` the listing data is included into the JavaScript file.
+This way it can be used even when the site if opened from the file system (via a `file://` URL).
+The disadvantage is that the loading of the script will take longer and the data is not loaded asynchronously, so the loading of the page via the Internet will be delayed.
+Because of that it is set to `false` by default.
+
 ### Search mode
 
 You can set the search mode via the `data-serachmode` attribute:
@@ -114,7 +122,9 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ### Head
 
-- Use relative links on the `listings_file` page.
+- The plugin should now be able to work when served from `file://` URLs:
+    - Search JSON can be inlined to the script via `offline: true` setting.
+    - Use relative links on the `listings_file` page.
 - Improved the search code:
     - Allow users to specify which matching mode the search uses by default.
     - Added mode `Contains words (case insensitive)`.
