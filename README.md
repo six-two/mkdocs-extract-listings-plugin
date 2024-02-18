@@ -120,7 +120,7 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
-### Head
+### Version 0.1.0
 
 - The plugin should now be able to work when served from `file://` URLs:
     - Search JSON can be inlined to the script via `offline: true` setting.
