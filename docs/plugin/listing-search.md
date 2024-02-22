@@ -13,13 +13,14 @@ This page has a search function for all listings.
 <script>
 (() => {
 const scriptElement = document.createElement("script");
+const jsLink = "some-path/listing-search.js";
 
 if (location.pathname.endsWith("/") || location.pathname.endsWith("/index.html")) {
     // use_directory_urls: true
-    scriptElement.src = "../../listing-search.js";
+    scriptElement.src = "../../" + jsLink;
 } else {
     // use_directory_urls: false
-    scriptElement.src = "../listing-search.js";
+    scriptElement.src = "../" + jsLink;
 }
 
 document.head.append(scriptElement);

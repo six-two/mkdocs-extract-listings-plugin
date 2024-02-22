@@ -6,7 +6,7 @@ plugins:
 - extract_listings:
     listings_file: plugin/all-listings.md
     placeholder: CUSTOM_PLACEHOLDER_FOR_THE_LISTINGS_PLUGIN
-    javascript_search_file: listing-search.js
+    javascript_search_file: some-path/listing-search.js
     default_css: true
     offline: false
 

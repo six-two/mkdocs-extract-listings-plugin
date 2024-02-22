@@ -14,6 +14,18 @@ STYLE=``;
 OFFLINE_JSON_DATA=null;
 // END
 
+let parentDirectoryUrl = new URL(document.currentScript.src);
+parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
+parentDirectoryUrl.query = "";
+parentDirectoryUrl.hash = "";
+const base_url = parentDirectoryUrl.href.endsWith("/") ? parentDirectoryUrl.href : parentDirectoryUrl.href + "/";
+console.debug("The base URL for the search result links is", base_url);
+
+const normalizeUrl = (url) => {
+    return new URL(url, location.href);
+};
+
+
 const parent = document.getElementById("listing-extract-search");
 if (parent) {
     const search_mode = parent.getAttribute("data-searchmode") || DEFAULT_SEARCH_MODE;
@@ -164,7 +176,8 @@ if (parent) {
 
     const on_json_loaded = (json) => {
         // Publicly accessible for easier debugging
-        window.extract_listings_case_sensitive = json
+        // Remap the URLs based on the location of this script (which is in the same directory as the JSON file)
+        window.extract_listings_case_sensitive = json.map(x => ({...x, page_url: normalizeUrl(base_url + x.page_url)}));
         // @TODO: maybe only cache this if an cae-insensitive mode is selected?
         window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 
@@ -184,4 +197,3 @@ if (parent) {
     console.warn("Could not find any element with id 'listing-extract-search'")
 }
 })();
-
