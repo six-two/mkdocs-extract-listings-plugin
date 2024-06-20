@@ -1,5 +1,6 @@
 #listing-extract-search .search-input-line {
     display: flex;
+    flex-wrap: wrap;
 }
 
 #listing-extract-search .search-input-line input {

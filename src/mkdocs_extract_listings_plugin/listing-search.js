@@ -99,9 +99,12 @@ if (parent) {
         entry.value = name;
         entry.innerText = name;
         search_language.append(entry);
-        }
+    }
         
     add_search_language("any") // default option
+
+    search_type.title = "The search algorithm to use";
+    search_language.title = "Only show snippets in this language";
 
     search_type.addEventListener("change", refresh_search_results);
     search_language.addEventListener("change", refresh_search_results);
