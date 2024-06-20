@@ -38,6 +38,7 @@ def is_code_listing(pre_node) -> bool:
 class ListingData(NamedTuple):
     text: str
     html: str
+    language: str # empty string if not set
 
 
 class PageData(NamedTuple):
@@ -76,9 +77,17 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
         for pre in soup.findAll('pre'):
             if is_code_listing(pre):
+                language = "" # empty = no language, the default
+                parent_with_highlight = pre.find_parent("div", class_="highlight")
+                if parent_with_highlight:
+                    for class_ in parent_with_highlight.attrs.get("class", []):
+                        if class_.startswith("language-"):
+                            language = class_.replace("language-", "", 1)
+
                 listings.append(ListingData(
                     text=pre.get_text(),
                     html=str(pre),
+                    language=language,
                 ))
 
         if listings:
@@ -138,6 +147,7 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                     "page_url": url_prefix + page.page_url,
                     "text": listing.text,
                     "html": listing.html,
+                    "language": listing.language,
                 })
 
         return json_data

@@ -63,7 +63,8 @@ if (parent) {
             search(e.target.value, false);
         }
     });
-    search_input.addEventListener("input", (e) => search(e.target.value, true));
+    const refresh_search_results = () => search(search_input.value, true);
+    search_input.addEventListener("input", refresh_search_results);
 
     const search_count_div = document.createElement("div");
     search_count_div.classList.add("search-count");
@@ -91,9 +92,21 @@ if (parent) {
     } else {
         console.warn(`The search order type '${search_mode}' is unknown. Valid values are ${search_type_list}`)
     }
-    search_type.addEventListener("change", () => search(search_input.value, true));
+    
+    const search_language = document.createElement("select");
+    const add_search_language = (name) => {
+        const entry = document.createElement("option");
+        entry.value = name;
+        entry.innerText = name;
+        search_language.append(entry);
+        }
+        
+    add_search_language("any") // default option
 
-    const search_input_line = add_div(null, "search-input-line", search_input, search_type);
+    search_type.addEventListener("change", refresh_search_results);
+    search_language.addEventListener("change", refresh_search_results);
+        
+    const search_input_line = add_div(null, "search-input-line", search_input, search_type, search_language);
     add_div(parent, "search-inputs", search_input_line, search_count_div);
     const search_output = add_div(parent, "search-output");
     console.debug("Attached search to ", parent);
@@ -116,18 +129,28 @@ if (parent) {
         return text.match(/\b\w+\b/g) || [];
     }
 
-    const internal_search = (query) => {
-        if (search_type.value.endsWith("-i")) {
+    const internal_search = (query, search_mode, filter_language) => {
+        // Handle the differences between case sensitive and insensitive search
+        let listings_list;
+        if (search_mode.endsWith("-i")) {
             // Search mode without the -i
-            let search_mode = search_type.value.slice(0, -2);
+            search_mode = search_mode.slice(0, -2);
             // Use the lowercase versions of the query and the search data
-            return internal_search_logic(query.toLowerCase(), window.extract_listings_lowercase, search_mode);
+            query = query.toLowerCase();
+            listings_list = window.extract_listings_lowercase;
         } else {
-            return internal_search_logic(query, window.extract_listings_case_sensitive, search_type.value);
+            listings_list = window.extract_listings_case_sensitive;
         }
-    }
 
-    const internal_search_logic = (query, listings_list, search_mode) => {
+
+        // Handle the language filter
+        if (filter_language != "any") {
+            // We need to pre-filter the listings by the programming language
+            listings_list = listings_list.filter(x => x.language == filter_language);
+        }
+
+
+        // Handle the different search modes
         if (search_mode == "substr") {
             return listings_list.filter(x => x.text.includes(query));
         } else if (search_mode == "words") {
@@ -153,9 +176,12 @@ if (parent) {
         }
     }
 
+
     const search = (query, preview) => {
-        console.debug(`Searching for '${query}' with method ${search_type.value}`);
-        const results = internal_search(query);
+        const search_mode = search_type.value;
+        const filter_language = search_language.value;
+        console.debug(`Searching for '${query}' with method ${search_mode} and language ${filter_language}`);
+        const results = internal_search(query, search_mode, filter_language);
 
         search_output.innerHTML = "";//remove children
 
@@ -181,9 +207,15 @@ if (parent) {
         // @TODO: maybe only cache this if an cae-insensitive mode is selected?
         window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 
+        let language_list = json.map(x => x.language);
+        // remove duplicates and sort alphabetically
+        language_list = [...new Set(language_list)].sort();
+        // register all languages for the dropdown menu
+        language_list.forEach(language => add_search_language(language));
+
         // As soon as all data is loaded, search for the current value
         // Use preview to prevent a self-DOS when there are many listings and the query is empty
-        search(search_input.value, true);
+        refresh_search_results();
     };
 
     if (OFFLINE_JSON_DATA != null) {
