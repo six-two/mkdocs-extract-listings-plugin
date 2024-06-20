@@ -120,6 +120,10 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
+### Version 0.1.2
+
+- Added a dropdown to filter snippets by language.
+
 ### Version 0.1.1
 
 - Fix: Links incorrect if search page is not in the root directory.
