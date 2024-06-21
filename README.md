@@ -30,6 +30,18 @@ The source for this demo is also in this repo (`mkdocs.yml`, `docs/` and `build.
     More information about plugins in the [MkDocs documentation](http://www.mkdocs.org/user-guide/plugins/).
 
 3. Configure a page with all listings, a page with listing search, or both (see below).
+4. Optional: To properly detect which language a listing belongs to, you may have to add the following to your `mkdocs.yml` as described in the [Material for MkDocs page on code blocks](https://squidfunk.github.io/mkdocs-material/reference/code-blocks/):
+    ```yaml
+    markdown_extensions:
+    - pymdownx.highlight:
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+    ```
+
 
 ### Listing page
 
@@ -119,6 +131,12 @@ Alternatively you can put in a random value and will receive an warning message 
 
 
 ## Changelog
+
+### Head
+
+- Added `exclude_language_list` option which excludes listings in the given languages from the search
+- Correctly recognize `mermaid` language when using MkDocs for Material
+- Hide the language selector when only one language exists
 
 ### Version 0.1.2
 

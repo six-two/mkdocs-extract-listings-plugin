@@ -9,6 +9,7 @@ plugins:
     javascript_search_file: some-path/listing-search.js
     default_css: true
     offline: false
+    # exclude_language_list: [text, bash, mermaid]
 
 theme: material
 site_url: https://mkdocs-extract-listings-plugin.six-two.dev/
@@ -21,4 +22,8 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

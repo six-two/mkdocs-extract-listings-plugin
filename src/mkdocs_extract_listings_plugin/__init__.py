@@ -5,7 +5,7 @@ from html import escape
 import json
 from urllib.parse import urlparse
 # pip
-from mkdocs.config.config_options import Type
+from mkdocs.config.config_options import Type, ListOfItems
 from mkdocs.config.base import Config
 from mkdocs.exceptions import PluginError
 from mkdocs.plugins import BasePlugin, get_plugin_logger
@@ -22,6 +22,7 @@ class ListingsConfig(Config):
     default_css = Type(bool, default=True)
     offline = Type(bool, default=False)
     javascript_search_file = Type(str, default="")
+    exclude_language_list = ListOfItems(Type(str), default=[])
 
 
 def is_code_listing(pre_node) -> bool:
@@ -35,10 +36,62 @@ def is_code_listing(pre_node) -> bool:
         return False
 
 
+def get_code_listing_language(pre, logger) -> str:
+    language = "" # empty = no language, the default
+    parent_with_highlight = pre.find_parent("div", class_="highlight")
+    if parent_with_highlight:
+        for class_ in parent_with_highlight.attrs.get("class", []):
+            if class_.startswith("language-"):
+                if language:
+                    logger.warn("[Warn] Multiple languages in class list:", parent_with_highlight.attrs.get("class", []))
+                    # Exit early, so that we do not show the message multiple times
+                    return language
+                else:
+                    language = class_.replace("language-", "", 1)
+    else:
+        # Check if it is a mermaid diagram
+        for class_ in pre.attrs.get("class", []):
+            if class_ == "mermaid":
+                language = "mermaid"
+    
+    return language
+
+
+def get_page_url(page: Page, logger) -> str:
+    page_url = page.abs_url or page.canonical_url or page.url
+    # This SHOULD fix the duplicate slash display bug (like '//readthedocs/')
+    for _ in range(3):
+        page_url = page_url.replace("//", "/")
+
+    # Remove leading slash
+    if page_url.startswith("/"):
+        page_url = page_url[1:] or "index.html"
+
+    if page_url.startswith("http://") or page_url.startswith("https://"):
+        self.logger.warning(f"page_url is expected to be just a path, but it is a full URL: '{page_url}'")
+        # No clue if it can happen. If it can, I should parse the path from the URL (and maybe remove the base URL).
+    
+    return page_url
+
+
 class ListingData(NamedTuple):
     text: str
     html: str
     language: str # empty string if not set
+
+
+def parse_listings_from_html(html: str, logger) -> list[ListingData]:
+    listings = []
+    soup = BeautifulSoup(html, "html.parser")
+
+    for pre in soup.findAll('pre'):
+        if is_code_listing(pre):
+            listings.append(ListingData(
+                text=pre.get_text(),
+                html=str(pre),
+                language=get_code_listing_language(pre, logger),
+            ))
+    return listings
 
 
 class PageData(NamedTuple):
@@ -72,41 +125,11 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
     # https://www.mkdocs.org/dev-guide/plugins/#on_page_content
     def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files) -> None:
-        listings = []
-        soup = BeautifulSoup(html, "html.parser")
-
-        for pre in soup.findAll('pre'):
-            if is_code_listing(pre):
-                language = "" # empty = no language, the default
-                parent_with_highlight = pre.find_parent("div", class_="highlight")
-                if parent_with_highlight:
-                    for class_ in parent_with_highlight.attrs.get("class", []):
-                        if class_.startswith("language-"):
-                            language = class_.replace("language-", "", 1)
-
-                listings.append(ListingData(
-                    text=pre.get_text(),
-                    html=str(pre),
-                    language=language,
-                ))
-
-        if listings:
-            page_url = page.abs_url or page.canonical_url or page.url
-            # This SHOULD fix the duplicate slash display bug (like '//readthedocs/')
-            for _ in range(3):
-                page_url = page_url.replace("//", "/")
-
-            # Remove leading slash
-            if page_url.startswith("/"):
-                page_url = page_url[1:] or "index.html"
-
-            if page_url.startswith("http://") or page_url.startswith("https://"):
-                self.logger.warning(f"page_url is expected to be just a path, but it is a full URL: '{page_url}'")
-                # No clue if it can happen. If it can, I should parse the path from the URL (and maybe remove the base URL).
-
+        if listings := parse_listings_from_html(html, self.logger):
+            listings = [x for x in listings if x.language not in self.config.exclude_language_list]
             self.page_data.append(PageData(
                 page_name=page.title or "Untitled page",
-                page_url=page_url,
+                page_url=get_page_url(page, self.logger),
                 listings=listings,
             ))
 

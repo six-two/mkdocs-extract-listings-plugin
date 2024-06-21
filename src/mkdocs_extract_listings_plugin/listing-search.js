@@ -216,6 +216,11 @@ if (parent) {
         // register all languages for the dropdown menu
         language_list.forEach(language => add_search_language(language));
 
+        if (language_list.length < 2) {
+            console.debug("It does not make sense to show the selector, since there is only one choice -> hiding language dropdown");
+            search_language.style.display = "none";
+        }
+
         // As soon as all data is loaded, search for the current value
         // Use preview to prevent a self-DOS when there are many listings and the query is empty
         refresh_search_results();
