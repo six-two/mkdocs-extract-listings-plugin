@@ -44,10 +44,10 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
             if not os.path.isfile(listings_file):
                 raise PluginError(f"'listings_file' does not reference a valid Markdown file: '{listings_file}' does not exist")
             elif not self.config.listings_file.endswith(".md"):
-                self.logger.warning(f"Value for 'listings_file' should probably end in '.md', but is '{self.config.listings_file}'")
+                logger.warning(f"Value for 'listings_file' should probably end in '.md', but is '{self.config.listings_file}'")
         else:
             if not self.config.javascript_search_file:
-                self.logger.warning("Neither 'javascript_search_file' nor 'listings_file' are set -> This plugin will do nothing. Please check the setup instructions at https://github.com/six-two/mkdocs-extract-listings-plugin/blob/main/README.md")
+                logger.warning("Neither 'javascript_search_file' nor 'listings_file' are set -> This plugin will do nothing. Please check the setup instructions at https://github.com/six-two/mkdocs-extract-listings-plugin/blob/main/README.md")
 
     # https://www.mkdocs.org/dev-guide/plugins/#on_page_content
     def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files) -> None:

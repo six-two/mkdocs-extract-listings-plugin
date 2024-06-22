@@ -84,6 +84,9 @@ plugins:
     javascript_search_file: listing-search.js
     default_css: true
     offline: false
+    exclude_language_list:
+    - python
+    - bash
 ```
 
 ### default_css
@@ -115,9 +118,14 @@ This way it can be used even when the site if opened from the file system (via a
 The disadvantage is that the loading of the script will take longer and the data is not loaded asynchronously, so the loading of the page via the Internet will be delayed.
 Because of that it is set to `false` by default.
 
+### exclude_language_list
+
+Ignore any listings that are in the given languages.
+They will not appear on the all listings page or in the listings search.
+
 ### Search mode
 
-You can set the search mode via the `data-serachmode` attribute:
+You can set the search mode via the `data-searchmode` attribute:
 ```html
 <div id="listing-extract-search" data-searchmode="substr"></div>
 ```
@@ -132,7 +140,7 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
-### Head
+### Version 0.1.3
 
 - Added `exclude_language_list` option which excludes listings in the given languages from the search
 - Correctly recognize `mermaid` language when using MkDocs for Material
