@@ -7,15 +7,33 @@
 // This limits load required to parse entries, etc and should result in the user getting some quick feedback on his/her search
 (() => {
 PREVIEW_RESULTS = 15;
-BASE_URL="";
 DEFAULT_SEARCH_MODE="substr-i";
 // START: These values may be overwritten when the file is copied by the plugin
 STYLE=``;
 OFFLINE_JSON_DATA=null;
 // END
 
-let parentDirectoryUrl = new URL(document.currentScript.src);
-parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
+let parentDirectoryUrl;
+if (document.currentScript && document.currentScript.src) {
+    // This is run when the script is included via an <script src=...> tag.
+    // The script is always at the same location, no matter on which page it is inluded.
+    parentDirectoryUrl = new URL(document.currentScript.src);
+    parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
+} else {
+    // This is run when the script is inlined to a page.
+    // In this case we can not be certain about where we are, but the python code fixed all relative paths, so that they should work from here.
+    parentDirectoryUrl = new URL(window.location.href);
+    const directoryUrlsUsed = parentDirectoryUrl.pathname.endsWith("/") || parentDirectoryUrl.pathname.endsWith("/index.html")
+    if (directoryUrlsUsed) {
+        // Directory URLs are in use -> go up one directory and remove file name
+        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/"));
+        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
+    } else {
+        // Directory URLs are disabled -> stay in directory but remove file name
+        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
+    }
+}
+
 parentDirectoryUrl.query = "";
 parentDirectoryUrl.hash = "";
 const base_url = parentDirectoryUrl.href.endsWith("/") ? parentDirectoryUrl.href : parentDirectoryUrl.href + "/";

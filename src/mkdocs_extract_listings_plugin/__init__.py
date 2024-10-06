@@ -24,13 +24,12 @@ class ListingsConfig(Config):
 # local
 from .page_processor import PageProcessor
 from .all_listings_page import update_all_listings_page
-from .search_page import write_javascript_file
+from .search_page import write_javascript_file, get_javascript_file_source_code
 
 
 class ListingsPlugin(BasePlugin[ListingsConfig]):
     def on_config(self, config: MkDocsConfig) -> None:
         self.page_processor = PageProcessor(self.config)
-
 
     def on_pre_build(self, config: MkDocsConfig) -> None:
         # Reset before every build -> prevent duplicate entries when running mkdocs serve
@@ -47,11 +46,21 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
                 logger.warning(f"Value for 'listings_file' should probably end in '.md', but is '{self.config.listings_file}'")
         else:
             if not self.config.javascript_search_file:
-                logger.warning("Neither 'javascript_search_file' nor 'listings_file' are set -> This plugin will do nothing. Please check the setup instructions at https://github.com/six-two/mkdocs-extract-listings-plugin/blob/main/README.md")
+                logger.warning("Neither 'javascript_search_file' nor 'listings_file' are set -> This plugin will do nothing, unless you use inline placeholder replacement. Please check the setup instructions at https://github.com/six-two/mkdocs-extract-listings-plugin/blob/main/README.md")
 
     # https://www.mkdocs.org/dev-guide/plugins/#on_page_content
     def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files) -> None:
         self.page_processor.process_page(html, page)
+
+    # https://www.mkdocs.org/dev-guide/plugins/#on_post_page
+    def on_post_page(self, output: str, page: Page, config: MkDocsConfig) -> str:
+        if "PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN" in output:
+            # Can not be cached, since script paths are dependent on current page path
+            # https://www.mkdocs.org/dev-guide/themes/#page
+            # https://www.mkdocs.org/dev-guide/api/#mkdocs.structure.files.File.src_uri
+            inline_script_html = '<div id="listing-extract-search"></div>\n<script>\n' + get_javascript_file_source_code(self.page_processor.page_data_list, self.config, True, page.file.src_uri, config) + '\n</script>'
+            output = output.replace("PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN", inline_script_html)
+        return output
 
     def on_post_build(self, config: MkDocsConfig) -> None:
         update_all_listings_page(self.page_processor.page_data_list, self.config, config)

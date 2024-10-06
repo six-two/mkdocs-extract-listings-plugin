@@ -61,7 +61,7 @@ plugins:
 2. Add a tag where the search elements should be inserted and load the search script:
     ```markdown
     <div id="listing-extract-search"></div>
-    <script src="/listing-search.js">
+    <script src="/listing-search.js" async></script>
     ```
 3. Specify where you want the plugin to write the script file to.
 This should match the path you used in the previous step.
@@ -72,6 +72,14 @@ This should match the path you used in the previous step.
     - extract_listings:
         javascript_search_file: listing-search.js
     ```
+
+I recommend using an absolute path for the `script.src` attribute, since it will keep working after moving the page or after switching between directory URLs and non directory URLs pages.
+It just runs into problems when your base directory (where the page is deployed) is not the root directory or when you are using offline mode (from `file://` URLs).
+
+Alternatively you can include the script and the data inline, but this can have tiny performance drawbacks:
+
+- If you include it on multiple pages, all of them will contain a copy of the data -> reduces caching efficiency
+- The whole search database needs to be downloaded while your page is loading (can not use `async` or `defer` script attributes).
 
 ## Configuration
 
