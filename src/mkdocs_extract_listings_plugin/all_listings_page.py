@@ -31,10 +31,14 @@ def get_listings_html(page_data_list: list[PageData], plugin_config: ListingsCon
     if plugin_config.default_css:
         html += '<style>a.url { color: gray; font-size: small; display: block; }</style>'
 
+    path_to_base_url = "../" * relative_path_to_markdown_file.count("/")
+    if config.use_directory_urls:
+        path_to_base_url += "../"
     for p in page_data_list:
-        relative_path = os.path.relpath(p.page_url, start=path_to_html_page_dir)
-        html += f'<h2><a class="heading" href="{escape(relative_path)}">{escape(p.page_name)}</a></h2>'
-        html += f'<a class="url" href="{escape(relative_path)}">{escape(p.page_url)}</a>'
+        relative_path = p.page_url
+
+        html += f'<h2><a class="heading" href="{escape(path_to_base_url + relative_path)}">{escape(p.page_name)}</a></h2>'
+        html += f'<a class="url" href="{escape(path_to_base_url + relative_path)}">{escape(relative_path)}</a>'
         for listing in p.listings:
             html += listing.html
 

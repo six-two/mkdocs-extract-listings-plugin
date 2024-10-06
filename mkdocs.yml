@@ -12,7 +12,7 @@ plugins:
     # exclude_language_list: [text, bash, mermaid]
 
 theme: material
-site_url: https://mkdocs-extract-listings-plugin.six-two.dev/
+site_url: https://mkdocs-extract-listings-plugin.six-two.dev/test/123/456/7890
 
 # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
 markdown_extensions:

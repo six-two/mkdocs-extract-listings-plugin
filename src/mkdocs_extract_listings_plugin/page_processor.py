@@ -29,7 +29,7 @@ class PageProcessor:
 
 
 def get_page_url(page: Page) -> str:
-    page_url = page.abs_url or page.canonical_url or page.url
+    page_url = page.url
     # This SHOULD fix the duplicate slash display bug (like '//readthedocs/')
     for _ in range(3):
         page_url = page_url.replace("//", "/")

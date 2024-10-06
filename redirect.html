@@ -19,5 +19,14 @@
             }
         </script>
     </ul>
+
+    There are also test fites for using non-directory URLs, since this changes how relative links have to be constructed:
+    <ul>
+        <script>
+            for (theme of ["mkdocs", "readthedocs", "material"]) {
+                document.write(`<li>${theme}: <a href="${theme}/plugin/listing-search.html">search page</a>, <a href="${theme}-no-dir/plugin/all-listings.html">all listings page</a></li>`)
+            }
+        </script>
+    </ul>
 </body>
 </html>

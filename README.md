@@ -148,6 +148,11 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
+### Head
+
+- Added inline placeholder search mode: Use `PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN` in a page to include the script and listings database inline into it.
+- @TODO: Investigate base URL issue with ./build.sh
+
 ### Version 0.1.3
 
 - Added `exclude_language_list` option which excludes listings in the given languages from the search

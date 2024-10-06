@@ -30,9 +30,20 @@ build_with_theme() {
     python3 -m mkdocs build -f "mkdocs-$1.yml" -t "$1" -d public/"$1"
 }
 
+build_with_theme_no_directory_urls() {
+    echo "[*] Building with theme $1"
+    sed -e "/^site_url:/s|\$|/$1/|" -e 's/use_directory_urls: true/use_directory_urls: false/' mkdocs.yml > "mkdocs-$1-no-dir.yml"
+    python3 -m mkdocs build -f "mkdocs-$1-no-dir.yml" -t "$1" -d public/"$1"-no-dir
+}
+
+
 build_with_theme mkdocs
 build_with_theme readthedocs
 build_with_theme material
+
+build_with_theme_no_directory_urls mkdocs
+build_with_theme_no_directory_urls readthedocs
+build_with_theme_no_directory_urls material
 
 if [[ -z "$1" ]]; then
     echo "[*] To view the site run:"
