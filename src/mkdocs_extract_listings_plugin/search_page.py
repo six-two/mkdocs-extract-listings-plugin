@@ -13,6 +13,7 @@ def get_javascript_file_source_code(page_data_list: list[PageData], plugin_confi
     with open(src_path, "r") as f:
         js = f.read()
 
+    js = js.replace("DEFAULT_SEARCH_MODE=null;", f'DEFAULT_SEARCH_MODE="{plugin_config.default_search_mode}";')
     if plugin_config.default_css:
         with open(os.path.join(SCRIPT_DIR, "default.css")) as f:
             css = f.read()

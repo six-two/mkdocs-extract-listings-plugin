@@ -7,7 +7,7 @@
 // This limits load required to parse entries, etc and should result in the user getting some quick feedback on his/her search
 (() => {
 PREVIEW_RESULTS = 15;
-DEFAULT_SEARCH_MODE="substr-i";
+DEFAULT_SEARCH_MODE=null;
 // START: These values may be overwritten when the file is copied by the plugin
 STYLE=``;
 OFFLINE_JSON_DATA=null;
@@ -17,6 +17,16 @@ OFFLINE_JSON_DATA=null;
 const normalizeUrl = (url) => {
     return new URL(url, location.href).pathname;
 };
+
+const createRegexFromBlob = (string) => {
+    // From: https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript but removed * and ?
+    string = string.replace(/[/\-\\^$+.()|[\]{}]/g, '\\$&');
+    // handle blob characters
+    // .* does not match line breaks, so we need to use [^] for "every character including line break" (everything except: nothing)
+    string = string.replaceAll("?", ".").replaceAll("*", "[^]*"); 
+
+    return RegExp(string);
+}
 
 const parent = document.getElementById("listing-extract-search");
 if (parent) {
@@ -76,6 +86,8 @@ if (parent) {
     add_search_type("substr-i", "Exact match (case insensitive)");
     add_search_type("words", "Contains words");
     add_search_type("words-i", "Contains words (case insensitive)");
+    add_search_type("glob", "Matches blobs ('*'=any sequence of characters, '?'=any character)");
+    add_search_type("glob-i", "Matches blobs (case insensitive)");
     add_search_type("fuzzy", "Fuzzy search (always case insensitive)");
 
     default_index = search_type_list.indexOf(search_mode);
@@ -159,6 +171,10 @@ if (parent) {
                 // Empty search queries return all listings for all other search types, so we should do the same here
                 return listings_list;
             }
+        } else if (search_mode == "glob") {
+            query_regex = createRegexFromBlob(query);
+            console.debug("Using regex:", query_regex);
+            return listings_list.filter(x => query_regex.test(x.text));
         } else if (search_mode == "fuzzy") {
             return fuzzysort.go(query, listings_list, {
                 "key": "text",

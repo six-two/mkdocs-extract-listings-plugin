@@ -1,7 +1,7 @@
 # builtin
 import os
 # pip
-from mkdocs.config.config_options import Type, ListOfItems
+from mkdocs.config.config_options import Choice, Type, ListOfItems
 from mkdocs.config.base import Config
 from mkdocs.exceptions import PluginError
 from mkdocs.plugins import BasePlugin, get_plugin_logger
@@ -19,6 +19,7 @@ class ListingsConfig(Config):
     offline = Type(bool, default=False)
     javascript_search_file = Type(str, default="")
     exclude_language_list = ListOfItems(Type(str), default=[])
+    default_search_mode = Choice(["substr", "substr-i", "words", "words-i", "glob", "glob-i", "fuzzy"], default="substr-i")
 
 
 # local

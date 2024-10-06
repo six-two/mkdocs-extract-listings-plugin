@@ -10,6 +10,7 @@ plugins:
     default_css: true
     offline: false
     # exclude_language_list: [text, bash, mermaid]
+    default_search_mode: glob
 
 theme: material
 site_url: https://mkdocs-extract-listings-plugin.six-two.dev/test/123/456/7890

@@ -92,6 +92,7 @@ plugins:
     javascript_search_file: listing-search.js
     default_css: true
     offline: false
+    default_search_mode: substr-i
     exclude_language_list:
     - python
     - bash
@@ -131,6 +132,11 @@ Because of that it is set to `false` by default.
 Ignore any listings that are in the given languages.
 They will not appear on the all listings page or in the listings search.
 
+### default_search_mode
+
+The default search mode to use for all search pages.
+This can be overwritten by the `data-searchmode` as shown below for individual search boxes.
+
 ### Search mode
 
 You can set the search mode via the `data-searchmode` attribute:
@@ -151,7 +157,9 @@ Alternatively you can put in a random value and will receive an warning message 
 ### Head
 
 - Added inline placeholder search mode: Use `PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN` in a page to include the script and listings database inline into it.
-- @TODO: Investigate base URL issue with ./build.sh
+- Fixed issues with sites using an non-root base directory (`site_url` property in `mkdocs.yml`).
+- Added `default_search_mode` setting, which allows to set the default search mode.
+- Added `glob` and `glob-i` search modes.
 
 ### Version 0.1.3
 
