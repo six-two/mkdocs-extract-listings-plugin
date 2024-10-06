@@ -13,36 +13,10 @@ STYLE=``;
 OFFLINE_JSON_DATA=null;
 // END
 
-let parentDirectoryUrl;
-if (document.currentScript && document.currentScript.src) {
-    // This is run when the script is included via an <script src=...> tag.
-    // The script is always at the same location, no matter on which page it is inluded.
-    parentDirectoryUrl = new URL(document.currentScript.src);
-    parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
-} else {
-    // This is run when the script is inlined to a page.
-    // In this case we can not be certain about where we are, but the python code fixed all relative paths, so that they should work from here.
-    parentDirectoryUrl = new URL(window.location.href);
-    const directoryUrlsUsed = parentDirectoryUrl.pathname.endsWith("/") || parentDirectoryUrl.pathname.endsWith("/index.html")
-    if (directoryUrlsUsed) {
-        // Directory URLs are in use -> go up one directory and remove file name
-        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/"));
-        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
-    } else {
-        // Directory URLs are disabled -> stay in directory but remove file name
-        parentDirectoryUrl.pathname = parentDirectoryUrl.pathname.substring(0, parentDirectoryUrl.pathname.lastIndexOf("/") +  1);
-    }
-}
-
-parentDirectoryUrl.query = "";
-parentDirectoryUrl.hash = "";
-const base_url = parentDirectoryUrl.href.endsWith("/") ? parentDirectoryUrl.href : parentDirectoryUrl.href + "/";
-console.debug("The base URL for the search result links is", base_url);
-
+// Convert relative to absolute URL
 const normalizeUrl = (url) => {
-    return new URL(url, location.href);
+    return new URL(url, location.href).pathname;
 };
-
 
 const parent = document.getElementById("listing-extract-search");
 if (parent) {
@@ -224,7 +198,7 @@ if (parent) {
     const on_json_loaded = (json) => {
         // Publicly accessible for easier debugging
         // Remap the URLs based on the location of this script (which is in the same directory as the JSON file)
-        window.extract_listings_case_sensitive = json.map(x => ({...x, page_url: normalizeUrl(base_url + x.page_url)}));
+        window.extract_listings_case_sensitive = json.map(x => ({...x, page_url: normalizeUrl(x.page_url)}));
         // @TODO: maybe only cache this if an cae-insensitive mode is selected?
         window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 

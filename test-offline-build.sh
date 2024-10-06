@@ -16,10 +16,15 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 
 # Do not use directory urls, since the browser does not map from /path/ to /path/index.html for file:// urls
-sed -e '/^use_directory_urls:/s|true|false|' -e '/offline:/s|false|true|' -e '/plugins:/a- offline' mkdocs.yml > "mkdocs-offline.yml"
+# use AWK instead of sed '/plugins:/a- offline' to make it work on macOS
+sed -e '/^use_directory_urls:/s|true|false|' -e '/offline:/s|false|true|' mkdocs.yml | awk '{print} /plugins:/ {print "- offline"}' > "mkdocs-offline.yml"
 
 echo "[*] Building site"
 python3 -m mkdocs build -f "mkdocs-offline.yml" || exit 1
 
 echo "[*] Opening path in firefox"
-firefox site/plugin/index.html
+if [[ $(uname) == Darwin ]]; then
+    open -a Firefox.app site/plugin/index.html
+else
+    firefox site/plugin/index.html
+fi

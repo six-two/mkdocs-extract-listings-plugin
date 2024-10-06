@@ -20,21 +20,13 @@ def get_javascript_file_source_code(page_data_list: list[PageData], plugin_confi
 
     # We traverse from the JSON file up to the root directory
     path_to_root = "../" * script_or_page_path.count("/")
+    if config.use_directory_urls:
+        path_to_root += "../"
     if offline:
         json_data = get_json_data(page_data_list, path_to_root)
         js = js.replace("OFFLINE_JSON_DATA=null;", f"OFFLINE_JSON_DATA={json.dumps(json_data)};")
     else:
         write_json_file(page_data_list, plugin_config, config, path_to_root)
-
-    if config.site_url:
-        path = urlparse(config.site_url).path
-        # Remove trailing trashes
-        while path.endswith("/"):
-            path = path[:-1]
-
-        if path:
-            # Path contains something else than just slashes
-            js = js.replace('BASE_URL=""', f'BASE_URL="{path}"')
 
     return js
 
