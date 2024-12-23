@@ -26,8 +26,6 @@ def update_all_listings_page(page_data_list: list[PageData], plugin_config: List
 
 def get_listings_html(page_data_list: list[PageData], plugin_config: ListingsConfig, config: MkDocsConfig, relative_path_to_markdown_file: str) -> str:
     html = ""
-    path_to_html_page_dir = os.path.dirname(markdown_path_to_html_path(config, relative_path_to_markdown_file))
-
     if plugin_config.default_css:
         html += '<style>a.url { color: gray; font-size: small; display: block; }</style>'
 

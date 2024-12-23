@@ -1,6 +1,5 @@
 import json
 import os
-from urllib.parse import urlparse
 # pip
 from mkdocs.config.defaults import MkDocsConfig
 # local
