@@ -196,7 +196,7 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
-### Head
+### Version 0.2.0
 
 - Added `search_page_path`, `search_page_create_if_missing` and `search_page_section_name` settings, which allow adding a search page without touching any Markdown files
 - Added inline placeholder search mode: Use `PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN` in a page to include the script and listings database inline into it.
