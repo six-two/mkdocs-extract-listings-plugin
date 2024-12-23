@@ -1,6 +1,7 @@
 # builtin
 import html
 import os
+from typing import Optional
 # pip
 from mkdocs.config.config_options import Choice, Type, ListOfItems
 from mkdocs.config.base import Config
@@ -64,46 +65,48 @@ class ListingsPlugin(BasePlugin[ListingsConfig]):
 
 
     def on_files(self, files: Files, config: MkDocsConfig) -> Files:
-        # It would probably be smart adding the file here, but it would likely make the logic more complicated.
-        # Since adding the file in on_nav works too, I will keep it that way for now
+        # Create the file, before the nav is created. This way our listing is added automatically to the expacted location in the nav
+        if self.search_page_path and not files.get_file_from_path(self.search_page_path):
+            if self.config.search_page_create_if_missing:
+                # Create a blank missing page
+                file = File.generated(config, self.search_page_path, content="", inclusion=InclusionLevel.INCLUDED)
+
+                # Add it to the list of files to be processed
+                files.append(file)
+            else:
+                logger.warning(f"Search page {self.search_page_path} does not exist and the plugin will not create it. Either set 'search_page_create_if_missing' to 'true' or manually create the page")
+
         return files
 
-    def on_nav(self, nav: Navigation, config: MkDocsConfig, files: Files) -> Navigation:
-        if self.config.search_page_path:
-            search_page_exists_in_file_system = os.path.exists(os.path.join(config.docs_dir, self.search_page_path))
-
+    def on_nav(self, nav: Navigation, config: MkDocsConfig, files: Files) -> Optional[Navigation]:
+        # If we enabled the creation of our page, check that it is also a part of the nav
+        if self.search_page_path:
             # Look in the existing pages for one with the same path
-            search_page = None
             for page in nav.pages:
                 if page.file.src_uri == self.search_page_path:
-                    search_page = page
-                    break
-            
-            if search_page_exists_in_file_system:
-                if search_page:
-                    # We found our page, so everything is good
-                    pass
-                else:
-                    logger.warning(f"Search page {self.search_page_path} exists, but is not in the navigation. This may hide it from users.")
-            else:
-                if self.config.search_page_create_if_missing:
-                    # If we need to create the search page, we need to add a virtual page with no markdown file on disk.
-                    # Since I remembered, that the print page plugin (https://github.com/timvink/mkdocs-print-site-plugin/blob/master/src/mkdocs_print_site_plugin/plugin.py) does exactly that,
-                    # I based my implementation roughly on how it is done there and on some info/comments from MkDocs's source code
+                    # We found the page and it is in the nav
+                    return None
 
-                    # Create a blank missing page
-                    file = File.generated(config, self.search_page_path, content="", inclusion=InclusionLevel.INCLUDED)
+            # We found no matching pages in the nav, so we need to add it and/or send a warning
+            if self.config.search_page_create_if_missing:
+                # Add our page to the nav
+                file = files.get_file_from_path(self.search_page_path)
+                if file:
+                    # Create a new page object
                     page = Page(self.search_page_section_name, file, config)
                     page.edit_url = None # Not sure why, but saw it here: https://github.com/timvink/mkdocs-print-site-plugin/blob/master/src/mkdocs_print_site_plugin/plugin.py
 
-                    # Add it to the end of the navigation
-                    nav.items.append(page)
+                    # Add it to the nav
                     nav.pages.append(page)
-                    files.append(file)
+                    nav.items.append(page)
+                    logger.warning(f"Search page {self.search_page_path} was missing from the nav, it has been added but may be in a strange location. It is recommended to manually specify it in the nav")
                 else:
-                    logger.warning(f"Search page {self.search_page_path} does not exist and the plugin will not create it. Either set 'search_page_create_if_missing' to 'true' or manually create the page")
-            
-        return nav
+                    logger.warning(f"BUG?: Search page {self.search_page_path} exists, but was not found in files")
+
+            else:
+                logger.warning(f"Search page {self.search_page_path} exists, but is not in the navigation. This may hide it from users. Either add it yourself or set the 'search_page_create_if_missing' option to 'True'")
+
+        return None
 
     def on_pre_build(self, config: MkDocsConfig) -> None:
         # Reset before every build -> prevent duplicate entries when running mkdocs serve

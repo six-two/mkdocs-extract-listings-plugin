@@ -17,6 +17,9 @@ plugins:
     search_page_section_name: Code Snippet Search
 
 
+# nav:
+# - index.md
+
 theme: material
 site_url: https://mkdocs-extract-listings-plugin.six-two.dev/test/123/456/7890
 

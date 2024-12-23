@@ -7,6 +7,10 @@
     flex: 1;
 }
 
+#listing-extract-search select {
+    max-width: 12em;
+}
+
 #listing-extract-search {
     border: 2px solid gray;
     border-radius: 5px;
