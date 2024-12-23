@@ -57,6 +57,31 @@ plugins:
 
 ### Listing search
 
+#### Via mkdocs.yml
+
+This is the simplest way and is recommended for most users:
+
+1. Set `search_page_path` in your plugin settings to either a page path (it can already exist, but does not need to):
+    ```yaml
+    plugins:
+    - extract_listings:
+        search_page_path: plugin/index.md
+    ```
+2. If the page does not exist and should be added by the plugin, then enable `search_page_create_if_missing`:
+    ```yaml
+    plugins:
+    - extract_listings:
+        search_page_path: plugin/index.md
+        search_page_create_if_missing: True
+    ```
+
+It the page already exists, then a new section with the search box and results will be added.
+If it does not exist and should be created, then a page containing only the search box and results will be created.
+
+#### Manual
+
+This is more complicated to set up, but you have more control about the page:
+
 1. Create a page, which should contain the search function.
 2. Add a tag where the search elements should be inserted and load the search script:
     ```markdown
@@ -96,6 +121,10 @@ plugins:
     exclude_language_list:
     - python
     - bash
+    search_page_path: ""
+    search_page_create_if_missing: false
+    search_page_section_name: Code Snippet Search
+
 ```
 
 ### default_css
@@ -137,6 +166,19 @@ They will not appear on the all listings page or in the listings search.
 The default search mode to use for all search pages.
 This can be overwritten by the `data-searchmode` as shown below for individual search boxes.
 
+### search_page_path
+
+Insert a search box and results on this page.
+This allows you to use the plugin without needing to modify the Markdown files in your `docs` directory.
+
+### search_page_create_if_missing
+
+If the page specified by `search_page_path` does not exist, then create it and add it to the navigation.
+
+### search_page_section_name
+
+The name of the section (if page exists) or the page title (if the page was newly created) that will be added to the page specified by `search_page_path`.
+
 ### Search mode
 
 You can set the search mode via the `data-searchmode` attribute:
@@ -156,6 +198,7 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ### Head
 
+- Added `search_page_path`, `search_page_create_if_missing` and `search_page_section_name` settings, which allow adding a search page without touching any Markdown files
 - Added inline placeholder search mode: Use `PLACEHOLDER_INLINE_LISTINGS_SEARCH_PLUGIN` in a page to include the script and listings database inline into it.
 - Fixed issues with sites using an non-root base directory (`site_url` property in `mkdocs.yml`).
 - Added `default_search_mode` setting, which allows to set the default search mode.

@@ -12,9 +12,9 @@ plugins:
     # exclude_language_list: [text, bash, mermaid]
     default_search_mode: glob
     # Add search page
-    search_page_path: plugin/listing-search-2.md
+    search_page_path: plugin/index.md
     search_page_create_if_missing: True
-    search_page_section_name: Code Snippet Search
+    search_page_section_name: Dynamically Inserted Code Snippet Search
 
 
 # nav:
