@@ -21,7 +21,7 @@ class ListingsConfig(Config):
     placeholder = Type(str, default="PLACEHOLDER_LISTINGS_PLUGIN")
     default_css = Type(bool, default=True)
     offline = Type(bool, default=False)
-    javascript_search_file = Type(str, default="")
+    javascript_search_file = Type(str, default="assets/javascript/code-snippet-search.js")
     exclude_language_list = ListOfItems(Type(str), default=[])
     default_search_mode = Choice(["substr", "substr-i", "words", "words-i", "glob", "glob-i", "fuzzy"], default="substr-i")
     # Add page options

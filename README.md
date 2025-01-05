@@ -196,6 +196,10 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
+### Head
+
+- Use a default value for `javascript_search_file` (fixes the README)
+
 ### Version 0.2.0
 
 - Added `search_page_path`, `search_page_create_if_missing` and `search_page_section_name` settings, which allow adding a search page without touching any Markdown files
