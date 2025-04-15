@@ -15,7 +15,7 @@ def parse_listings_from_html(html: str) -> list[ListingData]:
     listings = []
     soup = BeautifulSoup(html, "html.parser")
 
-    for pre in soup.findAll('pre'):
+    for pre in soup.find_all('pre'):
         if is_code_listing(pre):
             listings.append(ListingData(
                 text=pre.get_text(),

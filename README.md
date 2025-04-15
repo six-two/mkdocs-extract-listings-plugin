@@ -147,7 +147,7 @@ The value for `placeholder` will be searched in the file referenced by `listings
 ### javascript_search_file
 
 The JavaScript code for the search function will be written to this path.
-The default value is empty, meaning that neither the JSOn file nor the JavaScript are generated.
+The default value is empty, meaning that neither the JSON file nor the JavaScript are generated.
 
 ### offline
 
@@ -196,9 +196,10 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
-### Head
+### Version 0.2.1
 
-- Use a default value for `javascript_search_file` (fixes the README)
+- Use a default value for `javascript_search_file`.
+- Fixed DeprecationWarning: Replaced `bs4.findAll` with `bs4.find_all`.
 
 ### Version 0.2.0
 
