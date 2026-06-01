@@ -18,10 +18,7 @@ def get_javascript_file_source_code(page_data_list: list[PageData], plugin_confi
             css = f.read()
         js = js.replace("STYLE=``;", f"STYLE=`{css}`;")
 
-    # We traverse from the JSON file up to the root directory
-    path_to_root = "../" * script_or_page_path.count("/")
-    if config.use_directory_urls:
-        path_to_root += "../"
+    path_to_root = ""
     if offline:
         json_data = get_json_data(page_data_list, path_to_root)
         js = js.replace("OFFLINE_JSON_DATA=null;", f"OFFLINE_JSON_DATA={json.dumps(json_data)};")

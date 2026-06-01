@@ -21,11 +21,11 @@ plugins:
 # - index.md
 
 theme:
-  name: material
+  name: materialx
   features:
   - content.code.copy
 
-site_url: https://mkdocs-extract-listings-plugin.six-two.dev/test/123/456/7890
+site_url: https://mkdocs-extract-listings-plugin.six-two.dev/
 
 # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
 markdown_extensions:

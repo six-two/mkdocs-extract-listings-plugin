@@ -31,7 +31,7 @@ cp redirect.html public/index.html
 build_with_theme() {
     echo "[*] Building with theme $1"
     sed "/^site_url:/s|\$|/$1/|" $MKDOCS.yml > "$MKDOCS-$1.yml"
-    python3 -m $MKDOCS build -f "$MKDOCS-$1.yml" -t "$1" -d public/"$1"
+    python3 -m $MKDOCS build -f "$MKDOCS-$1.yml" -t "$1" -d "public/$1"
 }
 
 build_with_theme_no_directory_urls() {

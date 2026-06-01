@@ -13,11 +13,6 @@ STYLE=``;
 OFFLINE_JSON_DATA=null;
 // END
 
-// Convert relative to absolute URL
-const normalizeUrl = (url) => {
-    return new URL(url, location.href).pathname;
-};
-
 const createRegexFromBlob = (string) => {
     // From: https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript but removed * and ?
     string = string.replace(/[/\-\\^$+.()|[\]{}]/g, '\\$&');
@@ -214,8 +209,8 @@ if (parent) {
     const on_json_loaded = (json) => {
         // Publicly accessible for easier debugging
         // Remap the URLs based on the location of this script (which is in the same directory as the JSON file)
-        window.extract_listings_case_sensitive = json.map(x => ({...x, page_url: normalizeUrl(x.page_url)}));
-        // @TODO: maybe only cache this if an cae-insensitive mode is selected?
+        window.extract_listings_case_sensitive = json;
+        // @TODO: maybe only cache this if an case-insensitive mode is selected?
         window.extract_listings_lowercase = window.extract_listings_case_sensitive.map(x => ({...x, text: x.text.toLowerCase()}));
 
         let language_list = json.map(x => x.language);

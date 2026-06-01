@@ -2,6 +2,7 @@
 import html
 import os
 from typing import Optional
+from urllib.parse import urlparse
 # pip
 from mkdocs.config.config_options import Choice, Type, ListOfItems
 from mkdocs.config.base import Config
@@ -38,7 +39,15 @@ from .search_page import write_javascript_file, get_javascript_file_source_code
 
 class ListingsPlugin(BasePlugin[ListingsConfig]):
     def on_config(self, config: MkDocsConfig) -> None:
-        self.page_processor = PageProcessor(self.config)
+        if config.site_url:
+            base_url = urlparse(config.site_url).path
+        else:
+            base_url = "/"
+        # Remove douple slashes in path like //materialx/
+        while base_url.startswith("//"):
+            base_url = base_url[1:]
+
+        self.page_processor = PageProcessor(self.config, base_url)
         # Make sure that it is a relative path to the docs dir
         self.search_page_path = self.config.search_page_path.lstrip("/")
 

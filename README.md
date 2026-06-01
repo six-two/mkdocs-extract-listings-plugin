@@ -196,6 +196,11 @@ Alternatively you can put in a random value and will receive an warning message 
 
 ## Changelog
 
+### Version 0.3.0
+
+- Simplified URL handling code by always using absolute URLs -> search should work on any page undependent of nesting level
+- Removed dependency declaration of `mkdocs`
+
 ### Version 0.2.1
 
 - Use a default value for `javascript_search_file`.
