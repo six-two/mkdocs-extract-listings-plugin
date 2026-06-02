@@ -3,6 +3,10 @@
 A small plugin to extract all your listings and put them in a single page.
 It can also generate a search function of code listings with different search methods (fuzzy match, substring, contains words).
 
+## Note on Zensical, MkDocs 1.x, ProperDocs, etc
+
+To make it easy to keep it up to date for all my plugins, I hosted my [intentions of what platforms to support](https://six-two.dev/plugin-support-for-mkdocs-and-forks/) on my website.
+
 ## Demo
 
 You can try out the demo at <https://mkdocs-extract-listings-plugin.six-two.dev>.
